@@ -5,20 +5,27 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import org.w3c.dom.*;
 import ru.netology.employees.Employee;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
-        String fileName = "data.csv";
-        List<Employee> list = parseCSV(columnMapping, fileName);
+
+        List<Employee> list = parseCSV(columnMapping, "data.csv");
         String json = listToJson(list);
         writeString(json, "data.json");
+
+        List<Employee> list2 = parseXML("data.xml");
+        String json2 = listToJson(list2);
+        writeString(json2, "data2.json");
     }
 
     private static void writeString(String str, String fileName) {
@@ -47,6 +54,33 @@ public class Main {
             System.err.println(e.toString());
         }
         return null;
+    }
+
+    private static List<Employee> parseXML(String fileName) {
+        Document doc;
+        try {
+            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fileName);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            return null;
+        }
+
+        NodeList list = doc.getDocumentElement().getChildNodes();
+        List<Employee> employees = new ArrayList<>(list.getLength());
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            Element elem = (Element) node;
+            employees.add(new Employee(
+                    Long.parseLong(elem.getElementsByTagName("id").item(0).getTextContent()),
+                    elem.getElementsByTagName("firstName").item(0).getTextContent(),
+                    elem.getElementsByTagName("lastName").item(0).getTextContent(),
+                    elem.getElementsByTagName("country").item(0).getTextContent(),
+                    Integer.parseInt(elem.getElementsByTagName("age").item(0).getTextContent())));
+        }
+        return employees;
     }
 
 }
