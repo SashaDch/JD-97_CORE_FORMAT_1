@@ -53,7 +53,7 @@ public class Main {
         } catch (IOException e) {
             System.err.println(e.toString());
         }
-        return null;
+        return new ArrayList<Employee>();
     }
 
     private static List<Employee> parseXML(String fileName) {
@@ -62,7 +62,7 @@ public class Main {
             doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fileName);
         } catch (Exception e) {
             System.err.println(e.toString());
-            return null;
+            return new ArrayList<Employee>();
         }
 
         NodeList list = doc.getDocumentElement().getChildNodes();
